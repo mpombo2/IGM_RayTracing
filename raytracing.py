@@ -63,11 +63,40 @@ def intersect_sphere(O, D, S, R):
             return t1 if t0 < 0 else t0
     return np.inf
 
+def intersect_triangle(O, D, vertex1, vertex2, vertex3):
+		# Trumbore Algorithm
+		edge1 = vertex2 - vertex1
+		edge2 = vertex3 - vertex1
+		eps = .00001
+		pvec = np.cross(D, edge2)
+		det = edge1.dot(pvec)
+		if abs(det) < eps:
+			return np.inf
+		inv_det = 1. / det
+		tvec = O - vertex1
+		u = tvec.dot(pvec) * inv_det
+		if u < 0. or u > 1.:
+			return np.inf
+		qvec = np.cross(tvec, edge1)
+		v = D.dot(qvec) * inv_det
+		if v < 0. or u + v > 1.:
+			return np.inf
+		t = edge2.dot(qvec) * inv_det
+		if t < eps:
+			return np.inf
+
+		hit = np.array([t,u,v])
+		dist = np.linalg.norm(O-hit)
+
+		return float(dist)
+
 def intersect(O, D, obj):
     if obj['type'] == 'plane':
         return intersect_plane(O, D, obj['position'], obj['normal'])
     elif obj['type'] == 'sphere':
         return intersect_sphere(O, D, obj['position'], obj['radius'])
+    elif obj['type'] == 'triangle':
+        return intersect_triangle(O, D, obj['vertex1'], obj['vertex2'], obj['vertex3'],)
 
 def get_normal(obj, M):
     # Find normal.
@@ -75,6 +104,12 @@ def get_normal(obj, M):
         N = normalize(M - obj['position'])
     elif obj['type'] == 'plane':
         N = obj['normal']
+    elif obj['type'] == 'triangle':
+        # Compute the normal of the triangle using its three vertices.
+        vertex1, vertex2, vertex3 = obj['vertex1'], obj['vertex2'], obj['vertex3']
+        U = vertex2 - vertex1
+        V = vertex3 - vertex1
+        N = normalize(np.cross(U, V))
     return N
     
 def get_color(obj, M):
@@ -153,6 +188,11 @@ def trace_ray_first_part(rayO, rayD, lights):
 def add_sphere(position, radius, color):
     return dict(type='sphere', position=np.array(position), 
         radius=np.array(radius), color=np.array(color), reflection=.5)
+
+def add_triangle(vertex1, vertex2, vertex3, color):
+    return dict(type='triangle', vertex1=np.array(vertex1),
+                vertex2=np.array(vertex2), vertex3=np.array(vertex3), color=np.array(color),
+                reflection=.5)
     
 def add_plane(position, normal):
     return dict(type='plane', position=np.array(position), 
@@ -167,6 +207,7 @@ color_plane1 = 0. * np.ones(3)
 scene = [add_sphere([.75, .1, 1.], .6, [0., 0., 1.]),
          add_sphere([-.75, .1, 2.25], .6, [.5, .223, .5]),
          add_sphere([-2.75, .1, 3.5], .6, [1., .572, .184]),
+         add_triangle([0., 0.25, 1.], [-0.5, 0.75, 1.5], [0.5, 0.75, 1.5], [0.3, 0.8, 0.2]),
          add_plane([0., -.5, 0.], [0., 1., 0.]),
     ]
 
