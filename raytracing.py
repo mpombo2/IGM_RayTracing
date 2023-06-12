@@ -207,7 +207,7 @@ color_plane1 = 0. * np.ones(3)
 scene = [add_sphere([.75, .1, 1.], .6, [0., 0., 1.]),
          add_sphere([-.75, .1, 2.25], .6, [.5, .223, .5]),
          add_sphere([-2.75, .1, 3.5], .6, [1., .572, .184]),
-         add_triangle([0., 0.25, 1.], [-0.5, 0.75, 1.5], [0.5, 0.75, 1.5], [0.3, 0.8, 0.2]),
+         #add_triangle([0., 0.25, 1.], [-0.5, 0.75, 1.5], [0.5, 0.75, 1.5], [0.3, 0.8, 0.2]),
          add_plane([0., -.5, 0.], [0., 1., 0.]),
     ]
 
@@ -232,13 +232,17 @@ specular_k = 50
 
 depth_max = 5  # Maximum number of light reflections.
 col = np.zeros(3)  # Current color.
-O = np.array([0., 0.35, -1.])  # Camera.
+#O = np.array([0., 0.35, -1.])  # Camera.
 Q = np.array([0., 0., 0.])  # Camera pointing to.
 img = np.zeros((h, w, 3))
 
 r = float(w) / h
 # Screen coordinates: x0, y0, x1, y1.
-S = (-1., -1. / r + .25, 1., 1. / r + .25)
+#S = (-1., -1. / r + .25, 1., 1. / r + .25)
+
+# Actualizacion de variables para la Camara cenital
+O = np.array([0., 8., -10.])  # Camera.
+S = (-2., -2. / r + .25, 4., 4. / r + .25) #Screen coordinates
 
 # Loop through all pixels.
 for i, x in enumerate(np.linspace(S[0], S[2], w)):
@@ -264,4 +268,4 @@ for i, x in enumerate(np.linspace(S[0], S[2], w)):
             reflection *= obj.get('reflection', 1.)
         img[h - j - 1, i, :] = np.clip(col, 0, 1)
 
-plt.imsave('fig_part2.png', img)
+plt.imsave('fig.png', img)
